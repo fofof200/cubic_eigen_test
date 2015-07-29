@@ -210,9 +210,9 @@ void timer(std::string label, size_t n_iter, Func&& f) {
 }
 
 int main() {
-  const size_t N = 64;
-  const size_t n_iter = 20;
-  const size_t newton_iter = 4;
+  const size_t N = 512;
+  const size_t n_iter = 1;
+  const size_t newton_iter = 6;
   const bool verbose = false;
 
   std::vector<float> volume(N*N*N, 0.0f);
@@ -248,6 +248,9 @@ int main() {
   float e0_diff_sum = 0.0f;
   float e1_diff_sum = 0.0f;
   float e2_diff_sum = 0.0f;
+  float e0_diff_max = 0.0f;
+  float e1_diff_max = 0.0f;
+  float e2_diff_max = 0.0f;
   for (size_t i=0; i<volume.size(); ++i) {
     if (verbose) {
       std::cout << ""
@@ -259,15 +262,22 @@ int main() {
                 << e2s_simd[i] << " "
                 << std::endl;
     }
-    e0_diff_sum += std::abs(e0s[i] - e0s_simd[i]);
-    e1_diff_sum += std::abs(e1s[i] - e1s_simd[i]);
-    e2_diff_sum += std::abs(e2s[i] - e2s_simd[i]);
+    e0_diff_sum += fabs(e0s[i] - e0s_simd[i]);
+    e1_diff_sum += fabs(e1s[i] - e1s_simd[i]);
+    e2_diff_sum += fabs(e2s[i] - e2s_simd[i]);
+    e0_diff_max = std::max<float>(e0_diff_max, fabs(e0s[i] - e0s_simd[i]));
+    e1_diff_max = std::max<float>(e1_diff_max, fabs(e1s[i] - e1s_simd[i]));
+    e2_diff_max = std::max<float>(e2_diff_max, fabs(e2s[i] - e2s_simd[i]));
   }
   std::cout << N << "x" << N << "x" << N << " volume. Newton iter = " << newton_iter << std::endl;
   std::cout << "mean abs error: "
     << e0_diff_sum/volume.size() << ", "
     << e1_diff_sum/volume.size() << ", "
     << e2_diff_sum/volume.size() << std::endl;
+  std::cout << "max abs error: "
+    << e0_diff_max << ", "
+    << e1_diff_max << ", "
+    << e2_diff_max << std::endl;
   return 0;
 }
 
